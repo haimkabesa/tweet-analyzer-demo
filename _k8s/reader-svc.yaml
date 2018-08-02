@@ -1,0 +1,58 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: reader-svc
+  labels:
+    app: reader-svc
+    tier: backend
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: reader-svc
+        tier: backend
+    spec:
+      containers:
+      - name: reader-svc
+        image: "stiller/tweeteranalyzerdemo_reader:v1"
+        env:
+        - name: TwitterConsumerKey
+          valueFrom:
+            secretKeyRef:
+              name: twitter-secrets
+              key: TwitterConsumerKey
+        - name: TwitterConsumerSecret
+          valueFrom:
+            secretKeyRef:
+              name: twitter-secrets
+              key: TwitterConsumerSecret
+        - name: TwitterAccessToken
+          valueFrom:
+            secretKeyRef:
+              name: twitter-secrets
+              key: TwitterAccessToken
+        - name: TwitterAccessTokenSecret
+          valueFrom:
+            secretKeyRef:
+              name: twitter-secrets
+              key: TwitterAccessTokenSecret
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: reader-svc
+  labels:
+    app: reader-svc
+    tier: backend
+spec:
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  selector:
+    app: reader-svc
+    tier: backend

@@ -1,0 +1,45 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: analyzer-svc
+  labels:
+    app: analyzer-svc
+    tier: backend
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: analyzer-svc
+        tier: backend
+    spec:
+      containers:
+      - name: analyzer-svc
+        image: "stiller/tweeteranalyzerdemo_analyzer:v1"
+        env:
+        - name: TextAnalyticsApiKey
+          valueFrom:
+            secretKeyRef:
+              name: twitter-secrets
+              key: TextAnalyticsApiKey
+        - name: RabbitMQHost
+          value: rabbitmq
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: analyzer-svc
+  labels:
+    app: analyzer-svc
+    tier: backend
+spec:
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  selector:
+    app: analyzer-svc
+    tier: backend
